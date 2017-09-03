@@ -1,4 +1,6 @@
 defmodule ShoppingList do
+  alias ShoppingList.Entry
+
   # -------------------------------------------------------------------
   # API
   # -------------------------------------------------------------------
@@ -13,7 +15,7 @@ defmodule ShoppingList do
     Map.size(shopping_list.entries)
 
   def add_entry(shopping_list, name, quantity) do
-    new_entry = ShoppingList.Entry.new(shopping_list.next_entry_id, name, quantity)
+    new_entry = Entry.new(shopping_list.next_entry_id, name, quantity)
 
     %{shopping_list |
       entries: Map.put(shopping_list.entries, new_entry.id, new_entry),
@@ -26,7 +28,7 @@ defmodule ShoppingList do
       new_entry =
         shopping_list.entries
         |> Map.fetch!(entry_id)
-        |> ShoppingList.Entry.update_quantity(new_quantity)
+        |> Entry.update_quantity(new_quantity)
 
       %{shopping_list | entries: Map.put(shopping_list.entries, entry_id, new_entry)}
     else
