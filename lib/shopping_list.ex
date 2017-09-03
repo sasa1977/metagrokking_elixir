@@ -21,6 +21,19 @@ defmodule ShoppingList do
     }
   end
 
+  def update_entry_quantity(shopping_list, entry_id, new_quantity) do
+    if Map.has_key?(shopping_list.entries, entry_id) do
+      new_entry =
+        shopping_list.entries
+        |> Map.fetch!(entry_id)
+        |> ShoppingList.Entry.update_quantity(new_quantity)
+
+      %{shopping_list | entries: Map.put(shopping_list.entries, entry_id, new_entry)}
+    else
+      shopping_list
+    end
+  end
+
   def delete_entry(shopping_list, entry_id), do:
     %{shopping_list | entries: Map.delete(shopping_list.entries, entry_id)}
 end

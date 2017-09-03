@@ -9,4 +9,7 @@ defmodule ShoppingList.Entry do
       name: name,
       quantity: quantity
     }
+
+  def update_quantity(entry, new_quantity), do:
+    %{entry | quantity: new_quantity}
 end

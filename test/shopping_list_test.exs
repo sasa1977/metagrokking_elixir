@@ -57,6 +57,20 @@ defmodule ShoppingListTest do
     assert ShoppingList.size(list) == 2
   end
 
+  test "changing entry quantity" do
+    list =
+      ShoppingList.new()
+      |> ShoppingList.add_entry("eggs", 12)
+      |> ShoppingList.add_entry("biers", 6)
+      |> ShoppingList.update_entry_quantity(2, 18)
+
+    assert ShoppingList.size(list) == 2
+    assert sorted_entries(list) == [
+      %{id: 1, name: "eggs", quantity: 12},
+      %{id: 2, name: "biers", quantity: 18}
+    ]
+  end
+
 
   # -------------------------------------------------------------------
   # Internal functions
