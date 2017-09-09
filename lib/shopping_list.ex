@@ -4,20 +4,19 @@ defmodule ShoppingList do
   # -------------------------------------------------------------------
 
   def new(), do:
-    %{size: 0, next_entry_id: 1, entries: []}
+    %{next_entry_id: 1, entries: %{}}
 
   def entries(shopping_list), do:
-    shopping_list.entries
+    Map.values(shopping_list.entries)
 
   def size(shopping_list), do:
-    shopping_list.size
+    Map.size(shopping_list.entries)
 
   def add_entry(shopping_list, name, quantity) do
     new_entry = new_entry(shopping_list.next_entry_id, name, quantity)
 
     %{shopping_list |
-      entries: [new_entry | shopping_list.entries],
-      size: shopping_list.size + 1,
+      entries: Map.put(shopping_list.entries, new_entry.id, new_entry),
       next_entry_id: shopping_list.next_entry_id + 1
     }
   end
