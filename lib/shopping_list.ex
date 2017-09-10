@@ -1,12 +1,14 @@
 defmodule ShoppingList do
   alias ShoppingList.Entry
 
+  defstruct [:next_entry_id, :entries]
+
   # -------------------------------------------------------------------
   # API
   # -------------------------------------------------------------------
 
   def new(), do:
-    %{next_entry_id: 1, entries: %{}}
+    %ShoppingList{next_entry_id: 1, entries: %{}}
 
   def entries(shopping_list), do:
     Map.values(shopping_list.entries)
@@ -17,7 +19,7 @@ defmodule ShoppingList do
   def add_entry(shopping_list, name, quantity) do
     new_entry = Entry.new(shopping_list.next_entry_id, name, quantity)
 
-    %{shopping_list |
+    %ShoppingList{shopping_list |
       entries: Map.put(shopping_list.entries, new_entry.id, new_entry),
       next_entry_id: shopping_list.next_entry_id + 1
     }
@@ -30,12 +32,16 @@ defmodule ShoppingList do
         |> Map.fetch!(entry_id)
         |> Entry.update_quantity(new_quantity)
 
-      %{shopping_list | entries: Map.put(shopping_list.entries, entry_id, new_entry)}
+      %ShoppingList{shopping_list |
+        entries: Map.put(shopping_list.entries, entry_id, new_entry)
+      }
     else
       shopping_list
     end
   end
 
   def delete_entry(shopping_list, entry_id), do:
-    %{shopping_list | entries: Map.delete(shopping_list.entries, entry_id)}
+    %ShoppingList{shopping_list |
+      entries: Map.delete(shopping_list.entries, entry_id)
+    }
 end
