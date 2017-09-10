@@ -21,6 +21,9 @@ defmodule ShoppingList do
     }
   end
 
+  def delete_entry(shopping_list, entry_id), do:
+    %{shopping_list | entries: Map.delete(shopping_list.entries, entry_id)}
+
 
   # -------------------------------------------------------------------
   # Internal functions
