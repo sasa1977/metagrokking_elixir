@@ -4,17 +4,18 @@ defmodule ShoppingList do
   # -------------------------------------------------------------------
 
   def new(), do:
-    []
+    %{entries: []}
 
   def entries(shopping_list), do:
-    shopping_list
+    shopping_list.entries
 
   def size(shopping_list), do:
-    length(shopping_list)
+    length(shopping_list.entries)
 
   def add_entry(shopping_list, name, quantity) do
     new_entry = new_entry(name, quantity)
-    [new_entry | shopping_list]
+    new_entries = [new_entry | shopping_list.entries]
+    %{shopping_list | entries: new_entries}
   end
 
 
