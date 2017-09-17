@@ -19,7 +19,7 @@ defmodule ShoppingListTest do
       |> ShoppingList.add_entry("eggs", 12)
 
     assert ShoppingList.size(list) == 1
-    assert ShoppingList.entries(list) == [%{name: "eggs", quantity: 12}]
+    assert ShoppingList.entries(list) == [%{id: 1, name: "eggs", quantity: 12}]
   end
 
   test "two-elements list" do
@@ -32,8 +32,8 @@ defmodule ShoppingListTest do
     sorted_entries = list |> ShoppingList.entries() |> Enum.sort_by(&(&1.name))
     assert sorted_entries ==
       [
-        %{name: "biers", quantity: 6},
-        %{name: "eggs", quantity: 12}
+        %{id: 1, name: "biers", quantity: 6},
+        %{id: 2, name: "eggs", quantity: 12}
       ]
   end
 end

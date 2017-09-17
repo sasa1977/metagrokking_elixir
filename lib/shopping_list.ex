@@ -4,7 +4,7 @@ defmodule ShoppingList do
   # -------------------------------------------------------------------
 
   def new(), do:
-    %{size: 0, entries: []}
+    %{size: 0, next_entry_id: 1, entries: []}
 
   def entries(shopping_list), do:
     shopping_list.entries
@@ -13,11 +13,12 @@ defmodule ShoppingList do
     shopping_list.size
 
   def add_entry(shopping_list, name, quantity) do
-    new_entry = new_entry(name, quantity)
+    new_entry = new_entry(shopping_list.next_entry_id, name, quantity)
 
     %{shopping_list |
       entries: [new_entry | shopping_list.entries],
-      size: shopping_list.size + 1
+      size: shopping_list.size + 1,
+      next_entry_id: shopping_list.next_entry_id + 1
     }
   end
 
@@ -26,8 +27,9 @@ defmodule ShoppingList do
   # Internal functions
   # -------------------------------------------------------------------
 
-  defp new_entry(name, quantity), do:
+  defp new_entry(id, name, quantity), do:
     %{
+      id: id,
       name: name,
       quantity: quantity
     }
