@@ -12,43 +12,23 @@ defmodule ShoppingList.Service do
 
   @doc "Returns the shopping list entries."
   @spec entries(id) :: [Entry.t]
-  def entries(shopping_list_id) do
-    ensure_started(shopping_list_id)
-    GenServer.call(
-      Discovery.name(shopping_list_id),
-      :entries
-    )
-  end
+  def entries(shopping_list_id), do:
+    call(shopping_list_id, :entries)
 
   @doc "Adds an entry to the shopping list."
   @spec add_entry(id, Entry.name, Entry.quantity) :: :ok
-  def add_entry(shopping_list_id, name, quantity) do
-    ensure_started(shopping_list_id)
-    GenServer.cast(
-      Discovery.name(shopping_list_id),
-      {:add_entry, name, quantity}
-    )
-  end
+  def add_entry(shopping_list_id, name, quantity), do:
+    cast(shopping_list_id, {:add_entry, name, quantity})
 
   @doc "Updates the quantity of an entry in the shopping list."
-  @spec update_entry_quantity(id, Entry.id, Entry.quantity) :: :ok
-  def update_entry_quantity(shopping_list_id, entry_id, new_quantity) do
-    ensure_started(shopping_list_id)
-    GenServer.cast(
-      Discovery.name(shopping_list_id),
-      {:update_entry_quantity, entry_id, new_quantity}
-    )
-  end
+  @spec update_entry_quantity(id, Entry.id, Entry.quantity) :: :ok | {:error, atom}
+  def update_entry_quantity(shopping_list_id, entry_id, new_quantity), do:
+    cast(shopping_list_id, {:update_entry_quantity, entry_id, new_quantity})
 
   @doc "Deletes an entry in the shopping list."
   @spec delete_entry(id, Entry.id) :: :ok
-  def delete_entry(shopping_list_id, entry_id) do
-    ensure_started(shopping_list_id)
-    GenServer.cast(
-      Discovery.name(shopping_list_id),
-      {:delete_entry, entry_id}
-    )
-  end
+  def delete_entry(shopping_list_id, entry_id), do:
+    cast(shopping_list_id, {:delete_entry, entry_id})
 
 
   # -------------------------------------------------------------------
@@ -77,6 +57,16 @@ defmodule ShoppingList.Service do
   # -------------------------------------------------------------------
   # Internal functions
   # -------------------------------------------------------------------
+
+  defp call(shopping_list_id, message) do
+    ensure_started(shopping_list_id)
+    GenServer.call(Discovery.name(shopping_list_id), message)
+  end
+
+  defp cast(shopping_list_id, message) do
+    ensure_started(shopping_list_id)
+    GenServer.cast(Discovery.name(shopping_list_id), message)
+  end
 
   defp ensure_started(shopping_list_id) do
     if Discovery.whereis(shopping_list_id) == nil do
