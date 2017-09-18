@@ -11,6 +11,15 @@ defmodule ShoppingList.Service.Discovery do
   def name(shopping_list_id), do:
     {:via, Registry, {__MODULE__, shopping_list_id}}
 
+  @doc "Returns the pid of the shopping list service process."
+  @spec whereis(ShoppingList.Service.id) :: nil | pid
+  def whereis(shopping_list_id) do
+    case Registry.lookup(__MODULE__, shopping_list_id) do
+      [] -> nil
+      [{pid, _}] -> if Process.alive?(pid), do: pid, else: nil
+    end
+  end
+
 
   # -------------------------------------------------------------------
   # Supervision tree
