@@ -7,11 +7,6 @@ defmodule ShoppingList.ServiceTest do
   # Tests
   # -------------------------------------------------------------------
 
-  setup_all do
-    {:ok, _} = ShoppingList.BackendSystem.start_link()
-    :ok
-  end
-
   test "initial service state" do
     list_id = unique_list_id()
     assert Service.entries(list_id) == []

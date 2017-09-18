@@ -13,7 +13,7 @@ defmodule ShoppingList.Mixfile do
   end
 
   def application do
-    [extra_applications: [:logger]]
+    [extra_applications: [:logger], mod: {ShoppingList.Application, []}]
   end
 
   defp deps do
