@@ -6,8 +6,17 @@ defmodule ShoppingList.Service.Supervisor do
   # API
   # -------------------------------------------------------------------
 
-  @doc "Starts the process."
-  @spec start_link() :: Supervisor.on_start
+  @doc "Starts the shopping list service."
+  @spec start_service(ShoppingList.Service.id) :: Supervisor.on_start_child
+  def start_service(shopping_list_id), do:
+    Supervisor.start_child(__MODULE__, [shopping_list_id])
+
+
+  # -------------------------------------------------------------------
+  # Supervision tree
+  # -------------------------------------------------------------------
+
+  @doc false
   def start_link(), do:
     Supervisor.start_link(
       [ShoppingList.Service],
@@ -15,8 +24,13 @@ defmodule ShoppingList.Service.Supervisor do
       strategy: :simple_one_for_one
     )
 
-  @doc "Starts the shopping list service."
-  @spec start_service() :: Supervisor.on_start_child
-  def start_service(), do:
-    Supervisor.start_child(__MODULE__, [])
+  @doc false
+  def child_spec(_arg), do:
+    %{
+      id: __MODULE__,
+      start: {__MODULE__, :start_link, []},
+      restart: :permanent,
+      shutdown: 5000,
+      type: :supervisor
+    }
 end

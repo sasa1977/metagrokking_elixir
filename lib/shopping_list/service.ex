@@ -2,32 +2,45 @@ defmodule ShoppingList.Service do
   @moduledoc "Interface for working with a single shopping list service."
 
   use GenServer, start: {__MODULE__, :start_link, []}
-  alias ShoppingList.Entry
+  alias ShoppingList.{Entry, Service.Discovery}
 
+  @type id :: pos_integer
 
   # -------------------------------------------------------------------
   # API
   # -------------------------------------------------------------------
 
   @doc "Returns the shopping list entries."
-  @spec entries(pid) :: [Entry.t]
-  def entries(pid), do:
-    GenServer.call(pid, :entries)
+  @spec entries(id) :: [Entry.t]
+  def entries(shopping_list_id), do:
+    GenServer.call(
+      Discovery.name(shopping_list_id),
+      :entries
+    )
 
   @doc "Adds an entry to the shopping list."
-  @spec add_entry(pid, Entry.name, Entry.quantity) :: :ok
-  def add_entry(pid, name, quantity), do:
-    GenServer.cast(pid, {:add_entry, name, quantity})
+  @spec add_entry(id, Entry.name, Entry.quantity) :: :ok
+  def add_entry(shopping_list_id, name, quantity), do:
+    GenServer.cast(
+      Discovery.name(shopping_list_id),
+      {:add_entry, name, quantity}
+    )
 
   @doc "Updates the quantity of an entry in the shopping list."
-  @spec update_entry_quantity(pid, Entry.id, Entry.quantity) :: :ok
-  def update_entry_quantity(pid, entry_id, new_quantity), do:
-    GenServer.cast(pid, {:update_entry_quantity, entry_id, new_quantity})
+  @spec update_entry_quantity(id, Entry.id, Entry.quantity) :: :ok
+  def update_entry_quantity(shopping_list_id, entry_id, new_quantity), do:
+    GenServer.cast(
+      Discovery.name(shopping_list_id),
+      {:update_entry_quantity, entry_id, new_quantity}
+    )
 
   @doc "Deletes an entry in the shopping list."
-  @spec delete_entry(pid, Entry.id) :: :ok
-  def delete_entry(pid, entry_id), do:
-    GenServer.cast(pid, {:delete_entry, entry_id})
+  @spec delete_entry(id, Entry.id) :: :ok
+  def delete_entry(shopping_list_id, entry_id), do:
+    GenServer.cast(
+      Discovery.name(shopping_list_id),
+      {:delete_entry, entry_id}
+    )
 
 
   # -------------------------------------------------------------------
@@ -58,6 +71,6 @@ defmodule ShoppingList.Service do
   # -------------------------------------------------------------------
 
   @doc false
-  def start_link(), do:
-    GenServer.start_link(__MODULE__, nil)
+  def start_link(shopping_list_id), do:
+    GenServer.start_link(__MODULE__, nil, name: Discovery.name(shopping_list_id))
 end

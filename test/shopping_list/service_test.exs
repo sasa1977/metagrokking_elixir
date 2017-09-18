@@ -8,32 +8,58 @@ defmodule ShoppingList.ServiceTest do
   # -------------------------------------------------------------------
 
   setup_all do
-    {:ok, _} = Service.Supervisor.start_link()
+    {:ok, _} = ShoppingList.BackendSystem.start_link()
     :ok
   end
 
   test "initial service state" do
-    {:ok, pid} = Service.Supervisor.start_service()
-    assert Service.entries(pid) == []
+    list_id = unique_list_id()
+    {:ok, _} = Service.Supervisor.start_service(list_id)
+    assert Service.entries(list_id) == []
   end
 
   test "adding an element" do
-    {:ok, pid} = Service.Supervisor.start_service()
-    assert Service.add_entry(pid, "eggs", 12) == :ok
-    assert Service.entries(pid) == [%Entry{id: 1, name: "eggs", quantity: 12}]
+    list_id = unique_list_id()
+    {:ok, _} = Service.Supervisor.start_service(list_id)
+    assert Service.add_entry(list_id, "eggs", 12) == :ok
+    assert Service.entries(list_id) == [%Entry{id: 1, name: "eggs", quantity: 12}]
   end
 
   test "deleting an element" do
-    {:ok, pid} = Service.Supervisor.start_service()
-    Service.add_entry(pid, "eggs", 12)
-    assert Service.delete_entry(pid, 1) == :ok
-    assert Service.entries(pid) == []
+    list_id = unique_list_id()
+    {:ok, _} = Service.Supervisor.start_service(list_id)
+    Service.add_entry(list_id, "eggs", 12)
+    assert Service.delete_entry(list_id, 1) == :ok
+    assert Service.entries(list_id) == []
   end
 
   test "updating an existing element" do
-    {:ok, pid} = Service.Supervisor.start_service()
-    Service.add_entry(pid, "eggs", 12)
-    assert Service.update_entry_quantity(pid, 1, 24) == :ok
-    assert Service.entries(pid) == [%Entry{id: 1, name: "eggs", quantity: 24}]
+    list_id = unique_list_id()
+    {:ok, _} = Service.Supervisor.start_service(list_id)
+    Service.add_entry(list_id, "eggs", 12)
+    assert Service.update_entry_quantity(list_id, 1, 24) == :ok
+    assert Service.entries(list_id) == [%Entry{id: 1, name: "eggs", quantity: 24}]
   end
+
+  test "isolation of services with different names" do
+    list1 = unique_list_id()
+    {:ok, _} = Service.Supervisor.start_service(list1)
+
+    list2 = unique_list_id()
+    {:ok, _} = Service.Supervisor.start_service(list2)
+
+    Service.add_entry(list1, "eggs", 12)
+    Service.add_entry(list2, "biers", 6)
+
+    assert Service.entries(list1) == [%Entry{id: 1, name: "eggs", quantity: 12}]
+    assert Service.entries(list2) == [%Entry{id: 1, name: "biers", quantity: 6}]
+  end
+
+
+  # -------------------------------------------------------------------
+  # Internal functions
+  # -------------------------------------------------------------------
+
+  defp unique_list_id(), do:
+    :erlang.unique_integer([:positive, :monotonic])
 end
