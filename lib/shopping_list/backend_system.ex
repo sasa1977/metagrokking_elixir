@@ -11,6 +11,7 @@ defmodule ShoppingList.BackendSystem do
   def start_link(), do:
     Supervisor.start_link(
       [
+        ShoppingList.EctoRepo,
         ShoppingList.Service.Discovery,
         ShoppingList.Service.Supervisor
       ],
