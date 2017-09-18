@@ -24,10 +24,10 @@ defmodule ShoppingList.Service do
     end
   end
 
-  @doc "Returns the shopping list entries."
-  @spec entries(ShoppingList.id) :: [Entry.t]
-  def entries(shopping_list_id), do:
-    call(shopping_list_id, :entries)
+  @doc "Subscribes the calling process to the shopping list notifications."
+  @spec subscribe(ShoppingList.id) :: [Entry.t]
+  def subscribe(shopping_list_id), do:
+    call(shopping_list_id, {:subscribe, self()})
 
   @doc "Adds an entry to the shopping list."
   @spec add_entry(ShoppingList.id, Entry.id, Entry.name, Entry.quantity) :: :ok
@@ -54,22 +54,34 @@ defmodule ShoppingList.Service do
     Process.flag(:trap_exit, true)
     events = Storage.events(shopping_list_id)
     shopping_list = ShoppingList.new(shopping_list_id, events)
-    {:ok, shopping_list}
+    subscribers = new_subscribers()
+    {:ok, %{shopping_list: shopping_list, subscribers: subscribers}}
   end
 
   @impl true
-  def handle_call(:entries, _from, shopping_list), do:
-    {:reply, ShoppingList.entries(shopping_list), shopping_list}
+  def handle_call({:subscribe, subscriber}, _from, state), do:
+    {
+      :reply,
+      ShoppingList.entries(state.shopping_list),
+      update_in(state.subscribers, &add_subscriber(&1, subscriber))
+    }
 
   @impl true
-  def handle_cast({:add_entry, entry_id, name, quantity}, shopping_list), do:
-    apply_event(shopping_list, ShoppingList.entry_added(entry_id, name, quantity))
+  def handle_cast({:add_entry, entry_id, name, quantity}, state), do:
+    apply_event(state, ShoppingList.entry_added(entry_id, name, quantity))
 
-  def handle_cast({:update_entry_quantity, entry_id, quantity}, shopping_list), do:
-    apply_event(shopping_list, ShoppingList.entry_quantity_updated(entry_id, quantity))
+  def handle_cast({:update_entry_quantity, entry_id, quantity}, state), do:
+    apply_event(state, ShoppingList.entry_quantity_updated(entry_id, quantity))
 
-  def handle_cast({:delete_entry, entry_id}, shopping_list), do:
-    apply_event(shopping_list, ShoppingList.entry_deleted(entry_id))
+  def handle_cast({:delete_entry, entry_id}, state), do:
+    apply_event(state, ShoppingList.entry_deleted(entry_id))
+
+  @impl true
+  def handle_info({:EXIT, subscriber, _reason}, state), do:
+    {:noreply, update_in(state.subscribers, &remove_subscriber(&1, subscriber))}
+
+  def handle_info(other, state), do:
+    super(other, state)
 
 
   # -------------------------------------------------------------------
@@ -95,11 +107,31 @@ defmodule ShoppingList.Service do
     end
   end
 
-  defp apply_event(shopping_list, event) do
-    new_shopping_list = ShoppingList.apply_event(shopping_list, event)
-    Storage.store_event!(ShoppingList.id(shopping_list), event)
-    {:noreply, new_shopping_list}
+  defp apply_event(state, event) do
+    new_shopping_list = ShoppingList.apply_event(state.shopping_list, event)
+    Storage.store_event!(ShoppingList.id(state.shopping_list), event)
+    notify_subscribers(state.subscribers, event)
+    {:noreply, %{state | shopping_list: new_shopping_list}}
   end
+
+
+  # -------------------------------------------------------------------
+  # Subscribers management
+  # -------------------------------------------------------------------
+
+  defp new_subscribers(), do:
+    []
+
+  defp add_subscriber(subscribers, subscriber) do
+    Process.link(subscriber)
+    [subscriber | subscribers]
+  end
+
+  def remove_subscriber(subscribers, subscriber), do:
+    Enum.reject(subscribers, &(&1 == subscriber))
+
+  defp notify_subscribers(subscribers, event), do:
+    Enum.each(subscribers, &send(&1, {:shopping_list_event, event}))
 
 
   # -------------------------------------------------------------------
