@@ -1,18 +1,13 @@
 defmodule ShoppingList.Service do
   @moduledoc "Interface for working with a single shopping list service."
 
-  use GenServer
+  use GenServer, start: {__MODULE__, :start_link, []}
   alias ShoppingList.Entry
 
 
   # -------------------------------------------------------------------
   # API
   # -------------------------------------------------------------------
-
-  @doc "Starts the shopping list service."
-  @spec start_link() :: GenServer.on_start
-  def start_link(), do:
-    GenServer.start_link(__MODULE__, nil)
 
   @doc "Returns the shopping list entries."
   @spec entries(pid) :: [Entry.t]
@@ -56,4 +51,13 @@ defmodule ShoppingList.Service do
 
   def handle_cast({:delete_entry, entry_id}, shopping_list), do:
     {:noreply, ShoppingList.delete_entry(shopping_list, entry_id)}
+
+
+  # -------------------------------------------------------------------
+  # Supervision tree
+  # -------------------------------------------------------------------
+
+  @doc false
+  def start_link(), do:
+    GenServer.start_link(__MODULE__, nil)
 end
