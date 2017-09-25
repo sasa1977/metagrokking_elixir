@@ -28,6 +28,7 @@ defmodule ShoppingList do
   # API
   # -------------------------------------------------------------------
 
+  @doc "Creates the unique shopping list id."
   @spec new_id() :: id
   def new_id(), do:
     Ecto.UUID.generate()

@@ -1,6 +1,6 @@
 defmodule ShoppingList.ServiceTest do
   use ExUnit.Case, async: false
-  alias ShoppingList.{Entry, Service}
+  alias ShoppingList.{Entry, Service, Service.Discovery}
 
   setup do
     :ok = Ecto.Adapters.SQL.Sandbox.checkout(ShoppingList.EctoRepo)
@@ -92,19 +92,19 @@ defmodule ShoppingList.ServiceTest do
   end
 
   test "service is stopped when there are no subscribers" do
-    list_id = ShoppingList.new_id()
+    list_id = Service.new_id()
     subscriber = start_subscriber(list_id)
-    pid = ShoppingList.Service.Discovery.whereis(list_id)
+    pid = Discovery.whereis(Service, list_id)
     Process.monitor(pid)
     Task.shutdown(subscriber, :brutal_kill)
 
-    assert_receive {:DOWN, _mref, :process, ^pid, :normal}
+    assert_receive {:DOWN, _mref, :process, ^pid, :shutdown}
   end
 
   test "service is not stopped if there is at least one subscriber" do
-    list_id = ShoppingList.new_id()
+    list_id = Service.new_id()
     start_subscriber(list_id)
-    pid = ShoppingList.Service.Discovery.whereis(list_id)
+    pid = Discovery.whereis(Service, list_id)
     Process.monitor(pid)
 
     refute_receive {:DOWN, _mref, :process, ^pid, :normal}
@@ -117,15 +117,15 @@ defmodule ShoppingList.ServiceTest do
 
   defp start_service!() do
     Process.flag(:trap_exit, true)
-    list_id = ShoppingList.new_id()
+    list_id = Service.new_id()
     Service.subscribe(list_id)
     list_id
   end
 
   defp list_entries(list_id) do
     service_state =
-      list_id
-      |> ShoppingList.Service.Discovery.whereis()
+      ShoppingList.SubscriptionService
+      |> Discovery.whereis(list_id)
       |> :sys.get_state()
 
     ShoppingList.entries(service_state.shopping_list)

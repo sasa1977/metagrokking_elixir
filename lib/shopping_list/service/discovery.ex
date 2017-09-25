@@ -7,14 +7,14 @@ defmodule ShoppingList.Service.Discovery do
   # -------------------------------------------------------------------
 
   @doc "Returns the registration name that can be used with OTP processes such as `GenServer`."
-  @spec name(ShoppingList.id) :: GenServer.name
-  def name(shopping_list_id), do:
-    {:via, Registry, {__MODULE__, shopping_list_id}}
+  @spec name(module, ShoppingList.id) :: GenServer.name
+  def name(service_type, shopping_list_id), do:
+    {:via, Registry, {__MODULE__, {service_type, shopping_list_id}}}
 
   @doc "Returns the pid of the shopping list service process."
-  @spec whereis(ShoppingList.id) :: nil | pid
-  def whereis(shopping_list_id) do
-    case Registry.lookup(__MODULE__, shopping_list_id) do
+  @spec whereis(module, ShoppingList.id) :: nil | pid
+  def whereis(service_type, shopping_list_id) do
+    case Registry.lookup(__MODULE__, {service_type, shopping_list_id}) do
       [] -> nil
       [{pid, _}] -> if Process.alive?(pid), do: pid, else: nil
     end
