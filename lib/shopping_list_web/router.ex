@@ -16,11 +16,10 @@ defmodule ShoppingListWeb.Router do
   scope "/", ShoppingListWeb do
     pipe_through :browser # Use the default browser stack
 
-    get "/", PageController, :index
-  end
+    get "/", ListController, :create
 
-  # Other scopes may use custom stacks.
-  # scope "/api", ShoppingListWeb do
-  #   pipe_through :api
-  # end
+    resources "/lists", ListController, only: [:edit] do
+      resources "/entries", EntryController, only: [:create, :update, :delete]
+    end
+  end
 end

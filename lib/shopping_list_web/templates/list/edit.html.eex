@@ -1,0 +1,17 @@
+<%= form_tag("", id: "new_entry_form", style: "display:none;") do %>
+  <table class="paddedTable">
+    <tr>
+      <td><%= label(:entry, :name, "entry") %></td>
+      <td><%= text_input(:entry, :name, autofocus: true) %>
+    </tr>
+    <tr>
+      <td><%= label(:entry, :quantity, "quantity") %></td>
+      <td><%= number_input(:entry, :quantity) %></td>
+    </tr>
+  </table>
+
+  <%= submit("Add new entry", id: "add_button") %>
+<% end %>
+
+<table id="list_data" class="paddedTable">
+</table>

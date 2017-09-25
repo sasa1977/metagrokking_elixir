@@ -54,6 +54,19 @@ defmodule ShoppingListWeb do
     end
   end
 
+  def sign_list_id(list_id), do:
+    list_id
+    |> :erlang.term_to_binary()
+    |> Plug.Crypto.MessageVerifier.sign(secret())
+
+  def decode_list_id!(signed_list_id) do
+    {:ok, verified_message} = Plug.Crypto.MessageVerifier.verify(signed_list_id, secret())
+    :erlang.binary_to_term(verified_message)
+  end
+
+  defp secret(), do:
+    "super secret"
+
   @doc """
   When used, dispatch to the appropriate controller/view/etc.
   """
