@@ -1,0 +1,14 @@
+*
+
+!assets
+!config
+!lib
+!priv
+!rel
+!test
+!.tool-versions
+!mix.exs
+!mix.lock
+
+assets/vendor
+priv/static
