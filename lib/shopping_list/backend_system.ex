@@ -18,4 +18,19 @@ defmodule ShoppingList.BackendSystem do
       strategy: :rest_for_one,
       name: __MODULE__
     )
+
+
+  # -------------------------------------------------------------------
+  # Supervision tree
+  # -------------------------------------------------------------------
+
+  @doc false
+  def child_spec(_arg), do:
+    %{
+      id: __MODULE__,
+      start: {__MODULE__, :start_link, []},
+      restart: :permanent,
+      shutdown: 5000,
+      type: :supervisor
+    }
 end

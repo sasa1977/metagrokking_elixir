@@ -8,7 +8,19 @@ defmodule ShoppingList.Application do
   # Application callbacks
   # -------------------------------------------------------------------
 
-  @doc false
+  @impl true
   def start(_type, _args), do:
-    ShoppingList.BackendSystem.start_link()
+    Supervisor.start_link(
+      [
+        ShoppingList.BackendSystem,
+        ShoppingListWeb.Endpoint,
+      ],
+      strategy: :one_for_one
+    )
+
+  @doc false
+  def config_change(changed, _new, removed) do
+    ShoppingListWeb.Endpoint.config_change(changed, removed)
+    :ok
+  end
 end
