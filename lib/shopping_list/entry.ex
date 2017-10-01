@@ -5,7 +5,7 @@ defmodule ShoppingList.Entry do
 
   defstruct [:id, :name, :quantity]
 
-  @type id :: pos_integer
+  @type id :: String.t
   @type name :: String.t
   @type quantity :: pos_integer
 

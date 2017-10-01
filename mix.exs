@@ -20,6 +20,7 @@ defmodule ShoppingList.Mixfile do
     [
       {:ecto, "~> 2.2.3"},
       {:postgrex, "~> 0.13.0"},
+      {:poison, "~> 3.0"},
       {:dialyxir, "~> 0.5.0", runtime: false},
       {:ex_doc, "~> 0.16.0", only: :dev, runtime: false}
     ]

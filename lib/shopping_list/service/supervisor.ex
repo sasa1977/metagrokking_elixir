@@ -7,7 +7,7 @@ defmodule ShoppingList.Service.Supervisor do
   # -------------------------------------------------------------------
 
   @doc "Starts the shopping list service."
-  @spec start_service(ShoppingList.Service.id) :: Supervisor.on_start_child
+  @spec start_service(ShoppingList.id) :: Supervisor.on_start_child
   def start_service(shopping_list_id), do:
     Supervisor.start_child(__MODULE__, [shopping_list_id])
 
